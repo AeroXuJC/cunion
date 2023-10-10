@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.cunion.mapper.ActClassMapper">
+
+    <insert id="addActClass" parameterType="HashMap">
+        insert act_class set id = #{id},
+        act_class_name = #{actClassName},
+        picture = #{picture};
+    </insert>
+
+    <select id="searchActClassById" parameterType="String" resultType="HashMap">
+        select id, act_class_name as actClassName, picture, create_time as createTime,
+               update_time as updateTime from act_class where id = #{id} and is_deleted = 0;
+    </select>
+
+    <select id="searchAllActClass" parameterType="String" resultType="HashMap">
+        select id, act_class_name as actClassName, picture, create_time as createTime,
+               update_time as updateTime from act_class where is_deleted = 0 and position = #{position};
+    </select>
+
+</mapper>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.cunion.mapper.CommentMapper">
+
+    <select id="searchAllComments" parameterType="HashMap" resultType="HashMap">
+        select c.id,
+               c.user_id as userId,
+               c.comment_content as commentContent,
+               c.parent_id as parentId,
+               c.root_id as rootId,
+               c.picture as picture,
+               c.create_time as createTime,
+               c.update_time as updateTime,
+               u.avatar as avatar,
+               u.nickname as nickname
+        from comment c left join user u on u.id = c.user_id
+        where c.is_deleted = 0 and c.shop_id = #{shopId} and ((c.parent_id IS NULL OR c.parent_id = '') OR (c.parent_id IS NOT NULL AND c.root_id != ''))
+        order by c.create_time desc
+        limit #{start},#{length};
+    </select>
+
+    <select id="searchCommentById" parameterType="String" resultType="HashMap">
+        select c.id,
+               c.user_id as userId,
+               c.comment_content as commentContent,
+               c.root_id as rootId,
+               c.picture as picture,
+               c.create_time as createTime,
+               c.update_time as updateTime,
+               u.avatar as avatar,
+               u.nickname as nickname
+        from comment c left join user u on u.id = c.user_id
+        where c.id = #{id} and c.is_deleted = 0;
+    </select>
+
+    <insert id="addComment" parameterType="HashMap">
+        insert comment set id = #{id},
+                            user_id = #{userId},
+                            shop_id = #{shopId},
+                            comment_content = #{commentContent},
+                            parent_id = #{parentId},
+                            root_id = #{rootId},
+                            picture = #{picture};
+    </insert>
+
+    <select id="selectParentCommentById" parameterType="String" resultType="String">
+        select root_id from comment where id = #{parentId} And is_deleted = 0;
+    </select>
+
+    <update id="addParentComment" parameterType="HashMap">
+        update comment set
+        <if test="rootId != null">
+            root_id = #{rootId},
+        </if>
+            id = id
+        where id = #{parentId} And is_deleted = 0;
+    </update>
+
+    <update id="deleteAllMyComment" parameterType="String">
+        update comment set is_deleted = 1
+        where user_id = #{userId};
+    </update>
+
+    <update id="deleteMyComment" parameterType="HashMap">
+        update comment set is_deleted = 1
+        where user_id = #{userId} and id = #{id};
+    </update>
+
+    <select id="searchRootCommentById" parameterType="String" resultType="HashMap">
+        select root_id as rootId, parent_id as parentId from comment
+        where id = #{commentId} and is_deleted = 0;
+    </select>
+
+    <update id="deleteCommentById" parameterType="String">
+        update comment set is_deleted = 1
+        where id = #{commentId};
+    </update>
+
+    <update id="updateParentRootId" parameterType="HashMap">
+        update comment set root_id = #{rootId}
+        where is_deleted = 0 and id = #{parentId}
+    </update>
+
+</mapper>

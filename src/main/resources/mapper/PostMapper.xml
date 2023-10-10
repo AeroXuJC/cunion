@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.cunion.mapper.PostMapper">
+
+    <select id="searchAllPosts" parameterType="HashMap" resultType="HashMap">
+        select
+        p.id,
+        p.user_id as userId,
+        p.post_content as postContent,
+        p.post_address as postAddress,
+        p.tag_list as tagList,
+        p.visitor_num as visitorNum,
+        p.picture,
+        p.thumb_list as thumbList,
+        p.thumb_num as thumbNum,
+        p.create_time as shopCreateTime,
+        p.update_time as shopUpdateTime,
+        u.avatar as avatar,
+        u.nickname as nickname,
+        u.gender,
+        p.create_time as createTime
+        from post p left join user u on p.user_id = u.id
+        where p.is_deleted = 0
+        <if test="searchValue != null and searchValue != ''">
+            And p.post_content LIKE CONCAT('%', #{searchValue}, '%')
+        </if>
+        order by p.create_time desc
+        limit #{start},#{length};
+    </select>
+
+    <select id="searchAllPostById" parameterType="HashMap" resultType="HashMap">
+        select
+        p.id,
+        p.user_id as userId,
+        p.post_content as postContent,
+        p.post_address as postAddress,
+        p.tag_list as tagList,
+        p.visitor_num as visitorNum,
+        p.picture,
+        p.thumb_list as thumbList,
+        p.thumb_num as thumbNum,
+        p.create_time as shopCreateTime,
+        p.update_time as shopUpdateTime,
+        u.avatar as avatar,
+        u.nickname as nickname,
+        u.gender,
+        p.create_time as createTime
+        from post p left join user u on p.user_id = u.id
+        where p.is_deleted = 0 And p.id = #{id};
+    </select>
+
+    <select id="searchThumbListById" parameterType="String" resultType="String">
+        select thumb_list as thumbList from post where id = #{postId} and is_deleted = 0;
+    </select>
+
+    <update id="updateThumbList" parameterType="HashMap">
+        update post set thumb_list = #{thumbList} where id = #{postId};
+    </update>
+
+    <update id="addThumbNum" parameterType="String">
+        update post set thumb_num = thumb_num + 1 where id = #{id};
+    </update>
+
+    <update id="removeThumbNum" parameterType="String">
+        update post set thumb_num = thumb_num - 1 where id = #{id} and thumb_num >= 0;
+    </update>
+
+    <insert id="addPost" parameterType="HashMap">
+        insert into post (id, user_id, post_content, post_address, tag_list, picture)
+        values (#{id}, #{userId}, #{postContent}, #{postAddress}, #{tagList}, #{picture});
+    </insert>
+
+    <update id="deletePost" parameterType="String">
+        update post set is_deleted = 1 where id = #{id};
+    </update>
+
+    <select id="searchPostByTag" parameterType="String" resultType="HashMap">
+        select
+            p.id,
+            p.user_id as userId,
+            p.post_content as postContent,
+            p.post_address as postAddress,
+            p.tag_list as tagList,
+            p.visitor_num as visitorNum,
+            p.picture,
+            p.thumb_list as thumbList,
+            p.thumb_num as thumbNum,
+            p.create_time as shopCreateTime,
+            p.update_time as shopUpdateTime,
+            u.avatar as avatar,
+            u.nickname as nickname,
+            u.gender,
+            p.create_time as createTime
+        from post p left join user u on p.user_id = u.id
+        where p.is_deleted = 0 And p.tag_list = #{tagId}
+        order by p.create_time desc;
+    </select>
+</mapper>

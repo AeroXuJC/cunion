@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.cunion.mapper.DishMapper">
+
+    <select id="searchDishesByShopId" parameterType="String" resultType="HashMap">
+        select id,
+               dish_name as dishName,
+               dish_description as dishDescription,
+               dish_price as dishPrice,
+               picture,
+               dish_flavor as dishFlavor,
+               shop_id as shopId,
+               create_time as createTime,
+               update_time as updateTime
+        from dish
+        where is_deleted = 0 and shop_id = #{shopId}
+    </select>
+
+</mapper>

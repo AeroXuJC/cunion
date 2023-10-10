@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.cunion.mapper.UserMapper">
+
+    <insert id="touristLogin" parameterType="HashMap">
+        insert into user set id = #{userId},
+                             user_account = #{userAccount},
+                             password = #{password},
+                             nickname = #{nickname},
+                             address = #{address},
+                             gender = #{gender},
+                             user_role = #{userRole}
+    </insert>
+
+    <select id="searchUserRoleByUserId" parameterType="String" resultType="String">
+        select user_role as userRole from user where id = #{userId};
+    </select>
+<!--    注册用户-->
+    <insert id="register" parameterType="HashMap">
+        insert user set id = #{id},
+        user_account = #{userAccount},
+        password = #{password}, nickname = #{nickname}
+    </insert>
+
+<!--    根据用户账号查询用户信息-->
+    <select id="check" parameterType="HashMap" resultType="HashMap">
+        select * from user where user_account = #{userAccount};
+    </select>
+
+<!--    用户登录-->
+    <select id="login" parameterType="HashMap" resultType="HashMap">
+            select id, nickname, user_account, name, phone, email, address,avatar,
+                   stu_num, user_role from user where user_account = #{userAccount} and password = #{password};
+    </select>
+
+<!--    根据id查询用户信息-->
+    <select id="getLoginUser" parameterType="String" resultType="com.example.cunion.entity.User">
+        select id, nickname, user_account, name, gender, phone, email, address, avatar,
+               stu_num, user_role AS userRole, collect_list as collectList, thumb_list as thumbList, is_deleted from user where id = #{id};
+    </select>
+
+<!--    在数据库和redis中同步用户收藏列表-->
+    <update id="syncUserCollectRedisAndDb" parameterType="HashMap">
+        update user set collect_list = #{collect}
+        where id = #{id}
+    </update>
+
+<!--    在数据库和redis中同步用户点赞列表-->
+    <update id="syncUserThumbRedisAndDb" parameterType="HashMap">
+        update user set thumb_list = #{thumb}
+        where id = #{id}
+    </update>
+
+<!--    通过id查询用户昵称和头像-->
+    <select id="searchUserById" parameterType="String" resultType="HashMap">
+        select nickname,
+               avatar
+        from user
+        where is_deleted = 0 and id = #{id}
+    </select>
+
+    <update id="updateUserInfo" parameterType="HashMap">
+        update user set
+        <if test="userAccount != null and userAccount != '' ">
+            user_account = #{userAccount},
+        </if>
+        <if test="userRole != null and userRole != '' ">
+            user_role = #{userRole},
+        </if>
+        <if test="nickname != null and nickname != '' ">
+        nickname = #{nickname},
+        </if>
+        <if test="name != null and name != '' ">
+            name = #{name},
+        </if>
+        <if test="phone != null and phone != '' ">
+            phone = #{phone},
+        </if>
+        <if test="email != null and email != '' ">
+            email = #{email},
+        </if>
+        <if test="address != nul and address != '' ">
+            address = #{address},
+        </if>
+        <if test="gender != null and gender != '' ">
+            gender = #{gender},
+        </if>
+        <if test="stuNum != null and stuNum != '' ">
+            stu_num = #{stuNum},
+        </if>
+        <if test="avatar != null and avatar != '' ">
+            avatar = #{avatar},
+        </if>
+            id = id
+        where id = #{id} And is_deleted = 0
+    </update>
+
+
+    <select id="searchMyCollectList" parameterType="String" resultType="String">
+        select collect_list As collectList from user where id = #{userId} And is_deleted = 0;
+    </select>
+
+    <select id="searchMyThumbList" parameterType="String" resultType="String">
+        select thumb_list As thumbList from user where id = #{userId} And is_deleted = 0;
+    </select>
+
+    <update id="updatePassword" parameterType="HashMap">
+        update user set password = #{newPassword} where id = #{id} and password = #{password};
+    </update>
+
+    <select id="searchAllUserByPage" parameterType="HashMap" resultType="HashMap">
+        select *
+        from user
+        where 1 = 1
+        <if test="searchValue != null and searchValue != '' ">
+            And (nickname like CONCAT('%', #{searchValue}, '%') or user_account like CONCAT('%', #{searchValue}, '%') or name like CONCAT('%', #{searchValue}, '%') or id = #{searchValue})
+        </if>
+        order by update_time desc limit #{start}, #{length};
+    </select>
+
+    <update id="deleteUser" parameterType="String">
+        update user set is_deleted = 1 where id = #{userId}
+    </update>
+
+</mapper>

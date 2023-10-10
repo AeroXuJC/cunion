@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.cunion.mapper.ShopMapper">
+
+<!--    查询所有商家-->
+    <select id="searchAllShops" parameterType="HashMap" resultType="HashMap">
+        select id,
+               shop_name as shopName,
+               picture as picture,
+               shop_address as shopAddress,
+               shop_description as shopDescription,
+               shop_score as shopScore,
+               thumb,
+               collect,
+               work_time as workTime,
+               create_time as shopCreateTime,
+               update_time as shopUpdateTime,
+               is_deleted
+        from shop
+        where is_deleted = 0
+        <if test="position != null and position != '' and position != 'all'">
+            And shop_position = #{position}
+        </if>
+        <if test="floor != null and floor != '' and floor != 0">
+            And floor = #{floor}
+        </if>
+        <if test="searchValue != null and searchValue != ''">
+            And shop_name LIKE CONCAT('%', #{searchValue}, '%')
+        </if>
+        order by create_time desc
+        limit #{start},#{length};
+    </select>
+    <select id="syncAll" resultType="HashMap">
+        select id,
+            shop_name as shopName,
+            picture as picture,
+            shop_address as shopAddress,
+            shop_description as shopDescription,
+            shop_score as shopScore,
+            thumb,
+            collect,
+            work_time as workTime,
+            create_time as shopCreateTime,
+            update_time as shopUpdateTime,
+            is_deleted
+        from shop
+        where is_deleted = 0
+        <if test="position != null and position != '' and position != 'all'">
+            And shop_position = #{position}
+        </if>
+        <if test="floor != null and floor != '' and floor != '0'">
+            And floor = #{floor}
+        </if>
+        order by create_time desc
+    </select>
+
+    <select id="syncAllByPage" resultType="HashMap">
+        select id,
+        shop_name as shopName,
+        picture as picture,
+        shop_address as shopAddress,
+        shop_description as shopDescription,
+        shop_score as shopScore,
+        thumb,
+        collect,
+        work_time as workTime,
+        create_time as shopCreateTime,
+        update_time as shopUpdateTime,
+        is_deleted
+        from shop
+        order by create_time desc
+    </select>
+    <select id="searchAllShopsByPage" parameterType="HashMap" resultType="HashMap">
+        select id,
+        shop_name as shopName,
+        picture as picture,
+        shop_address as shopAddress,
+        shop_description as shopDescription,
+        shop_score as shopScore,
+        thumb,
+        collect,
+        work_time as workTime,
+        create_time as shopCreateTime,
+        update_time as shopUpdateTime,
+        is_deleted
+        from shop
+        where 1=1
+        <if test="searchValue != null and searchValue != ''">
+            And (shop_name LIKE CONCAT('%', #{searchValue}, '%') or floor LIKE CONCAT('%', #{searchValue}, '%') or
+            shop_description LIKE CONCAT('%', #{searchValue}, '%'))
+        </if>
+        order by create_time desc
+        limit #{start},#{length};
+    </select>
+<!--    根据id查询商家-->
+    <select id="searchShopById" parameterType="String" resultType="HashMap">
+        select id,
+               shop_name as shopName,
+               picture as picture,
+               shop_address as shopAddress,
+               shop_description as shopDescription,
+               shop_score as shopScore,
+               thumb,
+               collect,
+               work_time as workTime,
+               create_time as shopCreateTime,
+               update_time as shopUpdateTime,
+               is_deleted
+        from shop
+        where id = #{id};
+    </select>
+
+
+<!--    在数据库和redis中同步商家的收藏列表-->
+    <update id="syncShopCollectRedisAndDb" parameterType="HashMap">
+        update shop set collect = #{collect}
+        where id = #{id}
+    </update>
+
+<!--    在数据库和redis中同步商家的点赞列表-->
+    <update id="syncShopThumbRedisAndDb" parameterType="HashMap">
+        update shop set thumb = #{thumb}
+        where id = #{id}
+    </update>
+
+    <update id="updateShopById" parameterType="HashMap">
+        update shop set
+        <if test="shopName != null and shopName != '' ">
+            shop_name = #{shopName},
+        </if>
+        <if test="shopDescription != null and shopDescription != '' ">
+            shop_description = #{shopDescription},
+        </if>
+        <if test="shopAddress != null and shopAddress != '' ">
+            shop_address = #{shopAddress},
+        </if>
+        <if test="workTime != null and workTime != '' ">
+            work_name = #{workTime},
+        </if>
+        <if test="shopScore != null and shopScore != '' ">
+            shop_score = #{shopScore},
+        </if>
+        <if test="isDeleted != null and isDeleted != ''">
+            is_deleted = #{isDeleted},
+        </if>
+        id = id
+        where id = #{id}
+    </update>
+
+
+    <update id="deleteShop" parameterType="String">
+        update shop set is_deleted = 1 where id = #{shopId}
+    </update>
+</mapper>
