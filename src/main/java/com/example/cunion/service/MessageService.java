@@ -4,6 +4,7 @@ import com.example.cunion.entity.Message;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
 * @author Aero
@@ -14,8 +15,8 @@ public interface MessageService{
 
     String insertMessage(Message message);
 
-    ArrayList<HashMap> searchMyMessage(HashMap map);
+    List<HashMap> searchMyMessage(HashMap map);
 
-    Integer deleteMessage(String messageId);
+    Integer deleteMessage(String messageId, String id);
 
 }

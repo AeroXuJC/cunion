@@ -49,6 +49,7 @@ public interface ShopMapper extends BaseMapper<Shop> {
 
     Integer deleteShop(String shopId);
 
+    Integer addRate(HashMap map);
 
 
 }

@@ -38,11 +38,27 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         String searchValue = map.get("searchValue").toString();
         long end = start + length - 1;
         Long size = redisTemplate.opsForList().size("post:searchAllPosts");
-        if (size > 0 && searchValue.isEmpty()){
+        if (size > 0 && searchValue.isEmpty()) {
             List range = redisTemplate.opsForList().range("post:searchAllPosts", start, end);
             return range;
         }
         ArrayList<HashMap> list = postMapper.searchAllPosts(map);
+        ArrayList<HashMap> maps = postMapper.syncAllPosts(map);
+        for (int i = 0; i < maps.size(); i++) {
+            String tagList = maps.get(i).get("tagList").toString();
+            HashMap hashMap = tagMapper.searchTagById(tagList);
+            maps.get(i).replace("tagList", hashMap);
+            if (maps.get(i).get("picture") != null && !"".equals(maps.get(i).get("picture"))) {
+                String picture = maps.get(i).get("picture").toString();
+                String[] split = picture.split(",");
+                ArrayList arrayList = new ArrayList();
+                for (int j = 0; j < split.length; j++) {
+                    arrayList.add(split[j]);
+                }
+                maps.get(i).replace("picture", arrayList);
+            }
+        }
+
         for (int i = 0; i < list.size(); i++) {
             String tagList = list.get(i).get("tagList").toString();
             HashMap hashMap = tagMapper.searchTagById(tagList);
@@ -57,9 +73,9 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
                 list.get(i).replace("picture", arrayList);
             }
         }
-        if (searchValue.isEmpty()){
-            for (int i = list.size() - 1; i >= 0 ; i--) {
-                redisTemplate.opsForList().leftPush("post:searchAllPosts", list.get(i));
+        if (searchValue.isEmpty()) {
+            for (int i = maps.size() - 1; i >= 0; i--) {
+                redisTemplate.opsForList().leftPush("post:searchAllPosts", maps.get(i));
             }
             redisTemplate.expire("post:searchAllPosts", 1, TimeUnit.HOURS);
         }
@@ -70,19 +86,24 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
     public HashMap searchAllPostById(HashMap map) {
         String id = map.get("id").toString();
         Object content = redisTemplate.opsForValue().get("post:content:" + id);
-        if (content != null){
+        if (content != null) {
             Map<String, Object> mapRedis = BeanUtil.beanToMap(content);
             return (HashMap) mapRedis;
         }
         HashMap hashMap = postMapper.searchAllPostById(map);
-        Object picture = hashMap.get("picture");
-        if (picture != null && !picture.equals("")) {
-            ArrayList arrayList = new ArrayList();
-            String[] split = picture.toString().split(",");
-            for (int i = 0; i < split.length; i++) {
-                arrayList.add(split[i]);
+        if (hashMap == null){
+            throw new CunionException("该帖已删除！");
+        }
+        if (hashMap.containsKey("picture")){
+            Object picture = hashMap.get("picture");
+            if (picture != null && !picture.equals("")) {
+                ArrayList arrayList = new ArrayList();
+                String[] split = picture.toString().split(",");
+                for (int i = 0; i < split.length; i++) {
+                    arrayList.add(split[i]);
+                }
+                hashMap.replace("picture", arrayList);
             }
-            hashMap.replace("picture", arrayList);
         }
         String tagList = hashMap.get("tagList").toString();
         HashMap tagMap = tagMapper.searchTagById(tagList);
@@ -95,9 +116,11 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
     @Transactional
     @Override
     public Integer addPost(HashMap map) {
+        String userId = map.get("userId").toString();
+        redisTemplate.delete("post:myAllPost:" + userId);
         redisTemplate.delete("post:searchAllPosts");
         Set keys = redisTemplate.keys("post:class:*");
-        if (keys != null){
+        if (keys != null) {
             redisTemplate.delete(keys);
         }
         Integer result = postMapper.addPost(map);
@@ -106,8 +129,9 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         } catch (InterruptedException e) {
             throw new CunionException("添加失败");
         }
+        redisTemplate.delete("post:myAllPost:" + userId);
         redisTemplate.delete("post:searchAllPosts");
-        if (keys != null){
+        if (keys != null) {
             redisTemplate.delete(keys);
         }
         if (result != 1) {
@@ -118,10 +142,11 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
 
     @Transactional
     @Override
-    public Integer deletePost(String id){
+    public Integer deletePost(String id, String userId) {
+        redisTemplate.delete("post:myAllPost:" + userId);
         redisTemplate.delete("post:searchAllPosts");
         Set keys = redisTemplate.keys("post:class:*");
-        if (keys != null){
+        if (keys != null) {
             redisTemplate.delete(keys);
         }
         Integer result = postMapper.deletePost(id);
@@ -130,8 +155,9 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         } catch (InterruptedException e) {
             throw new CunionException("删除失败");
         }
+        redisTemplate.delete("post:myAllPost:" + userId);
         redisTemplate.delete("post:searchAllPosts");
-        if (keys != null){
+        if (keys != null) {
             redisTemplate.delete(keys);
         }
         if (result != 1) {
@@ -142,11 +168,11 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
 
     @Override
     public List<HashMap> searchPostByTag(String classId) {
-        if (classId.isEmpty()){
+        if (classId.isEmpty()) {
             classId = "88888888";
         }
         Long size = redisTemplate.opsForList().size("post:class:" + classId);
-        if (size > 0){
+        if (size > 0) {
             List range = redisTemplate.opsForList().range("post:class:" + classId, 0, -1);
             return range;
         }
@@ -178,6 +204,64 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         }
         redisTemplate.expire("post:class:" + classId, 1, TimeUnit.HOURS);
         return list;
+    }
+
+    @Override
+    public List<HashMap> searchMyPost(HashMap map) {
+        String userId = map.get("userId").toString();
+        String searchValue = map.get("searchValue").toString();
+        long start = Long.parseLong(map.get("start").toString());
+        long length = Long.parseLong(map.get("length").toString());
+        long end = start + length - 1;
+        Long size = redisTemplate.opsForList().size("post:myAllPost:" + userId);
+        if (searchValue.isEmpty()){
+            if (size > 0){
+                List range = redisTemplate.opsForList().range("post:myAllPost:" + userId, start, end);
+                return range;
+            }
+            //同步mysql 与 redis
+            List<HashMap> maps = postMapper.syncMyPost(map);
+            for (int i = 0; i < maps.size(); i++) {
+                String tagList = maps.get(i).get("tagList").toString();
+                HashMap hashMap = tagMapper.searchTagById(tagList);
+                maps.get(i).replace("tagList", hashMap);
+                if (maps.get(i).get("picture") != null && !"".equals(maps.get(i).get("picture"))) {
+                    String picture = maps.get(i).get("picture").toString();
+                    String[] split = picture.split(",");
+                    ArrayList arrayList = new ArrayList();
+                    for (int j = 0; j < split.length; j++) {
+                        arrayList.add(split[j]);
+                    }
+                    maps.get(i).replace("picture", arrayList);
+                }
+            }
+            for (HashMap hashMap : maps){
+                redisTemplate.opsForList().rightPush("post:myAllPost:" + userId, hashMap);
+            }
+            redisTemplate.expire("post:myAllPost:" + userId, 1, TimeUnit.HOURS);
+        }
+        List<HashMap> list = postMapper.searchMyPost(map);
+        for (int i = 0; i < list.size(); i++) {
+            String tagList = list.get(i).get("tagList").toString();
+            HashMap hashMap = tagMapper.searchTagById(tagList);
+            list.get(i).replace("tagList", hashMap);
+            if (list.get(i).get("picture") != null && !"".equals(list.get(i).get("picture"))) {
+                String picture = list.get(i).get("picture").toString();
+                String[] split = picture.split(",");
+                ArrayList arrayList = new ArrayList();
+                for (int j = 0; j < split.length; j++) {
+                    arrayList.add(split[j]);
+                }
+                list.get(i).replace("picture", arrayList);
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public Integer searchMyPostNum(String userId) {
+        Integer result = postMapper.searchMyPostNum(userId);
+        return result;
     }
 }
 

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
 * @author Aero
@@ -15,6 +16,8 @@ import java.util.HashMap;
 public interface PostMapper extends BaseMapper<Post> {
 
     ArrayList<HashMap> searchAllPosts(HashMap map);
+
+    ArrayList<HashMap> syncAllPosts(HashMap map);
 
     HashMap searchAllPostById(HashMap map);
 
@@ -31,6 +34,12 @@ public interface PostMapper extends BaseMapper<Post> {
     Integer deletePost(String id);
 
     ArrayList<HashMap> searchPostByTag(String tagId);
+
+    List<HashMap> searchMyPost(HashMap map);
+
+    List<HashMap> syncMyPost(HashMap map);
+
+    Integer searchMyPostNum(String userId);
 }
 
 

@@ -37,7 +37,7 @@ public class PostCommentServiceImpl extends ServiceImpl<PostCommentMapper, PostC
         long length = Long.parseLong(hashMap.get("length").toString());
         long end = start + length - 1;
         Long size = redisTemplate.opsForList().size("comment:postComment:" + postId);
-        if (size > 0){
+        if (size > 0) {
             List range = redisTemplate.opsForList().range("comment:postComment:" + postId, start, end);
             return range;
         }
@@ -103,7 +103,7 @@ public class PostCommentServiceImpl extends ServiceImpl<PostCommentMapper, PostC
     @Override
     public String selectParentCommentById(String parentId) {
         Object o = redisTemplate.opsForValue().get("comment:postComment:" + parentId);
-        if (o != null){
+        if (o != null) {
             return o.toString();
         }
         String result = postCommentMapper.selectParentCommentById(parentId);

@@ -18,6 +18,8 @@ public interface MessageMapper{
 
     ArrayList<HashMap> searchMyMessage(HashMap map);
 
+    ArrayList<HashMap> syncMyMessage(HashMap map);
+
     Integer deleteMessage(String messageId);
 }
 

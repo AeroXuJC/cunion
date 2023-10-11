@@ -21,8 +21,12 @@ public interface PostService extends IService<Post> {
 
     Integer addPost(HashMap map);
 
-    Integer deletePost(String id);
+    Integer deletePost(String id, String userId);
 
     List<HashMap> searchPostByTag(String classId);
+
+    List<HashMap> searchMyPost(HashMap map);
+
+    Integer searchMyPostNum(String userId);
 
 }

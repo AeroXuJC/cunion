@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 @RequestMapping("/dish")
@@ -18,7 +19,14 @@ public class DishController {
     @PostMapping("/searchDishesByShopId")
     public R searchDishesByShopId(@RequestHeader("token") String token, @RequestBody DishForm dishForm){
         String shopId = dishForm.getShopId();
-        ArrayList<HashMap> maps = dishService.searchDishesByShopId(shopId);
+        Integer start = dishForm.getStart();
+        Integer length = dishForm.getLength();
+        start = (start - 1) * length;
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("start", start);
+        map.put("length", length);
+        map.put("shopId", shopId);
+        List<HashMap> maps = dishService.searchDishesByShopId(map);
         return R.ok().put("result", maps);
     }
 }

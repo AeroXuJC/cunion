@@ -33,5 +33,7 @@ public interface ShopService {
 
     Integer deleteShop(String shopId);
 
+    Integer addRate(HashMap map);
+
 
 }

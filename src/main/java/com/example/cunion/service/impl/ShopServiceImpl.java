@@ -67,7 +67,7 @@ public class ShopServiceImpl implements ShopService {
         ArrayList<HashMap> maps = shopMapper.searchAllShops(hashMap);
         ArrayList<HashMap> list = shopMapper.syncAll(hashMap);
         for (int i = 0; i < list.size(); i++) {
-            redisTemplate.opsForList().leftPush(redisKey, list.get(i));
+            redisTemplate.opsForList().rightPush(redisKey, list.get(i));
         }
         redisTemplate.expire(redisKey, 1, TimeUnit.HOURS);
         return maps;
@@ -97,7 +97,7 @@ public class ShopServiceImpl implements ShopService {
         ArrayList<HashMap> maps = shopMapper.searchAllShopsByPage(hashMap);
         ArrayList<HashMap> list = shopMapper.syncAllByPage(hashMap);
         for (int i = 0; i < list.size(); i++) {
-            redisTemplate.opsForList().leftPush(redisKey, list.get(i));
+            redisTemplate.opsForList().rightPush(redisKey, list.get(i));
         }
         redisTemplate.expire(redisKey, 1, TimeUnit.HOURS);
         return maps;
@@ -199,5 +199,12 @@ public class ShopServiceImpl implements ShopService {
         return result;
     }
 
-
+    @Override
+    public Integer addRate(HashMap map) {
+        Integer result = shopMapper.addRate(map);
+        if (result != 1){
+            throw new CunionException("评分失败！");
+        }
+        return result;
+    }
 }

@@ -76,7 +76,7 @@ public class MessageController {
         map.put("start", start);
         map.put("length", length);
         map.put("receiverId", receiverId);
-        ArrayList<HashMap> list = messageService.searchMyMessage(map);
+        List<HashMap> list = messageService.searchMyMessage(map);
         ArrayList arrayList = new ArrayList();
         for (int i = 0; i < list.size(); i++) {
             Object content = list.get(i).get("content");
@@ -95,7 +95,8 @@ public class MessageController {
 
     @GetMapping("/deleteMessage")
     public R deleteMessage(@RequestHeader("token") String token, @RequestParam("messageId") String messageId){
-        Integer result = messageService.deleteMessage(messageId);
+        String userId = jwtUtil.getUserId(token);
+        Integer result = messageService.deleteMessage(messageId, userId);
         return R.ok();
     }
 }

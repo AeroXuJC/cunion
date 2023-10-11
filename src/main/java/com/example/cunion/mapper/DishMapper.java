@@ -13,7 +13,9 @@ import java.util.HashMap;
 * @Entity com.example.cunion.entity.Dish
 */
 public interface DishMapper extends BaseMapper<Dish> {
-    ArrayList<HashMap> searchDishesByShopId(String shopId);
+    ArrayList<HashMap> searchDishesByShopId(HashMap map);
+
+    ArrayList<HashMap> syncDishesByShopId(HashMap map);
 }
 
 

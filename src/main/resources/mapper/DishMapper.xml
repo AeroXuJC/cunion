@@ -4,18 +4,35 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.cunion.mapper.DishMapper">
 
-    <select id="searchDishesByShopId" parameterType="String" resultType="HashMap">
-        select id,
-               dish_name as dishName,
-               dish_description as dishDescription,
-               dish_price as dishPrice,
-               picture,
-               dish_flavor as dishFlavor,
-               shop_id as shopId,
-               create_time as createTime,
-               update_time as updateTime
-        from dish
-        where is_deleted = 0 and shop_id = #{shopId}
+    <select id="searchDishesByShopId" parameterType="HashMap" resultType="HashMap">
+        select d.id,
+               d.dish_name as dishName,
+               d.dish_description as dishDescription,
+               d.dish_price as dishPrice,
+               d.picture,
+               d.dish_flavor as dishFlavor,
+               d.shop_id as shopId,
+               d.create_time as createTime,
+               d.update_time as updateTime,
+               s.shop_name as shopName
+        from dish d left join shop s on d.shop_id = s.id
+        where d.is_deleted = 0 and d.shop_id = #{shopId}
+        limit #{start},#{length};
+    </select>
+
+    <select id="syncDishesByShopId" parameterType="HashMap" resultType="HashMap">
+        select d.id,
+               d.dish_name as dishName,
+               d.dish_description as dishDescription,
+               d.dish_price as dishPrice,
+               d.picture,
+               d.dish_flavor as dishFlavor,
+               d.shop_id as shopId,
+               d.create_time as createTime,
+               d.update_time as updateTime,
+               s.shop_name as shopName
+        from dish d left join shop s on d.shop_id = s.id
+        where d.is_deleted = 0 and d.shop_id = #{shopId}
     </select>
 
 </mapper>

@@ -30,6 +30,31 @@
         limit #{start},#{length};
     </select>
 
+    <select id="syncAllPosts" parameterType="HashMap" resultType="HashMap">
+        select
+        p.id,
+        p.user_id as userId,
+        p.post_content as postContent,
+        p.post_address as postAddress,
+        p.tag_list as tagList,
+        p.visitor_num as visitorNum,
+        p.picture,
+        p.thumb_list as thumbList,
+        p.thumb_num as thumbNum,
+        p.create_time as shopCreateTime,
+        p.update_time as shopUpdateTime,
+        u.avatar as avatar,
+        u.nickname as nickname,
+        u.gender,
+        p.create_time as createTime
+        from post p left join user u on p.user_id = u.id
+        where p.is_deleted = 0
+        <if test="searchValue != null and searchValue != ''">
+            And p.post_content LIKE CONCAT('%', #{searchValue}, '%')
+        </if>
+        order by p.create_time desc
+    </select>
+
     <select id="searchAllPostById" parameterType="HashMap" resultType="HashMap">
         select
         p.id,
@@ -96,5 +121,62 @@
         from post p left join user u on p.user_id = u.id
         where p.is_deleted = 0 And p.tag_list = #{tagId}
         order by p.create_time desc;
+    </select>
+
+    <select id="searchMyPost" parameterType="HashMap" resultType="HashMap">
+        select
+        p.id,
+        p.user_id as userId,
+        p.post_content as postContent,
+        p.post_address as postAddress,
+        p.tag_list as tagList,
+        p.visitor_num as visitorNum,
+        p.picture,
+        p.thumb_list as thumbList,
+        p.thumb_num as thumbNum,
+        p.create_time as shopCreateTime,
+        p.update_time as shopUpdateTime,
+        u.avatar as avatar,
+        u.nickname as nickname,
+        u.gender,
+        p.create_time as createTime
+        from post p left join user u on p.user_id = u.id
+        where p.is_deleted = 0 And p.user_id = #{userId}
+        <if test="searchValue != null and searchValue != ''">
+            And p.post_content LIKE CONCAT('%', #{searchValue}, '%')
+        </if>
+        order by p.create_time desc
+        limit #{start},#{length};
+    </select>
+
+    <select id="syncMyPost" parameterType="HashMap" resultType="HashMap">
+        select
+        p.id,
+        p.user_id as userId,
+        p.post_content as postContent,
+        p.post_address as postAddress,
+        p.tag_list as tagList,
+        p.visitor_num as visitorNum,
+        p.picture,
+        p.thumb_list as thumbList,
+        p.thumb_num as thumbNum,
+        p.create_time as shopCreateTime,
+        p.update_time as shopUpdateTime,
+        u.avatar as avatar,
+        u.nickname as nickname,
+        u.gender,
+        p.create_time as createTime
+        from post p left join user u on p.user_id = u.id
+        where p.is_deleted = 0 And user_id = #{userId}
+        <if test="searchValue != null and searchValue != ''">
+            And p.post_content LIKE CONCAT('%', #{searchValue}, '%')
+        </if>
+        order by p.create_time desc
+    </select>
+
+    <select id="searchMyPostNum" parameterType="String" resultType="Integer">
+        select count(*)
+        from post
+        where is_deleted = 0 And user_id = #{userId}
     </select>
 </mapper>

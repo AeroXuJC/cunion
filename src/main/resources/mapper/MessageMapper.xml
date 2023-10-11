@@ -17,6 +17,13 @@
         limit #{start},#{length};
     </select>
 
+    <select id="syncMyMessage" parameterType="HashMap" resultType="HashMap">
+        select *
+        from message
+        where receiver_id = #{receiverId} And is_deleted = 0
+        order by create_time desc
+    </select>
+
     <update id="deleteMessage" parameterType="String">
         update message set is_deleted = 1 where id = #{messageId}
     </update>

@@ -5,6 +5,7 @@ import com.example.cunion.common.R;
 import com.example.cunion.config.shiro.JwtUtil;
 import com.example.cunion.controller.form.AddPostForm;
 import com.example.cunion.controller.form.SearchAllPostsForm;
+import com.example.cunion.controller.form.SearchMyPostForm;
 import com.example.cunion.exception.CunionException;
 import com.example.cunion.mapper.PostMapper;
 import com.example.cunion.service.PostActClassService;
@@ -79,10 +80,12 @@ public class PostController {
                     throw new CunionException("取消点赞失败！");
                 }
             }
+            redisTemplate.delete("post:myAllPost:" + userId);
             redisTemplate.delete("post:content:" + postId);
             redisTemplate.delete("post:searchAllPosts");
             postMapper.removeThumbNum(postId);
             stringRedisTemplate.delete("post:thumb:" + postId + ":" + userId);
+            redisTemplate.delete("post:myAllPost:" + userId);
             redisTemplate.delete("post:content:" + postId);
             redisTemplate.delete("post:searchAllPosts");
             return R.ok("取消点赞").put("result", false);
@@ -107,10 +110,12 @@ public class PostController {
                 throw new CunionException("点赞失败！");
             }
         }
+        redisTemplate.delete("post:myAllPost:" + userId);
         redisTemplate.delete("post:content:" + postId);
         redisTemplate.delete("post:searchAllPosts");
         postMapper.addThumbNum(postId);
         stringRedisTemplate.opsForValue().set("post:thumb:" + postId + ":" + userId, userId + postId);
+        redisTemplate.delete("post:myAllPost:" + userId);
         redisTemplate.delete("post:content:" + postId);
         redisTemplate.delete("post:searchAllPosts");
         return R.ok("点赞成功").put("result", true);
@@ -157,7 +162,8 @@ public class PostController {
 
     @GetMapping("/deletePost")
     public R deletePost(@RequestHeader("token") String token, @RequestParam("id") String id) {
-        postService.deletePost(id);
+        String userId = jwtUtil.getUserId(token);
+        postService.deletePost(id, userId);
         return R.ok();
     }
 
@@ -173,6 +179,27 @@ public class PostController {
         }
         List<HashMap> list = postService.searchPostByTag(classId);
         return R.ok().put("result", list);
+    }
+
+    @PostMapping("/searchMyPost")
+    public R searchMyPost(@RequestHeader("token") String token, @RequestBody SearchMyPostForm form){
+        String userId = jwtUtil.getUserId(token);
+        Integer start = form.getStart();
+        Integer length = form.getLength();
+        start = (start - 1) * length;
+        String searchValue = form.getSearchValue();
+        HashMap map = new HashMap();
+        map.put("userId", userId);
+        map.put("start", start);
+        map.put("length", length);
+        map.put("searchValue", searchValue);
+        List<HashMap> list = postService.searchMyPost(map);
+        return R.ok().put("result", list);
+    }
+    @GetMapping("/searchMyPostNum")
+    public R searchMyPostNum(@RequestHeader("token") String token){
+        Integer result = postService.searchMyPostNum(jwtUtil.getUserId(token));
+        return R.ok().put("result", result);
     }
 
 }

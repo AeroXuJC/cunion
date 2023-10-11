@@ -153,4 +153,8 @@
     <update id="deleteShop" parameterType="String">
         update shop set is_deleted = 1 where id = #{shopId}
     </update>
+
+    <update id="addRate" parameterType="HashMap">
+        update shop set shop_score = #{score} where id = #{shopId} And is_deleted = 0;
+    </update>
 </mapper>
