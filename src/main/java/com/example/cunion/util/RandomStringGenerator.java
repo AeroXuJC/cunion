@@ -3,7 +3,7 @@ package com.example.cunion.util;
 import java.security.SecureRandom;
 
 public class RandomStringGenerator {
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyz0123456789";
     private static final SecureRandom RANDOM = new SecureRandom();
 
     public static String generateRandomString(int length) {
