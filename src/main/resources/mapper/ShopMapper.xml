@@ -7,17 +7,18 @@
 <!--    查询所有商家-->
     <select id="searchAllShops" parameterType="HashMap" resultType="HashMap">
         select id,
-               shop_name as shopName,
-               picture as picture,
-               shop_address as shopAddress,
-               shop_description as shopDescription,
-               shop_score as shopScore,
-               thumb,
-               collect,
-               work_time as workTime,
-               create_time as shopCreateTime,
-               update_time as shopUpdateTime,
-               is_deleted
+        shop_name as shopName,
+        picture as picture,
+        shop_address as shopAddress,
+        shop_description as shopDescription,
+        shop_score as shopScore,
+        floor,
+        thumb,
+        collect,
+        work_time as workTime,
+        create_time as shopCreateTime,
+        update_time as shopUpdateTime,
+        is_deleted
         from shop
         where is_deleted = 0
         <if test="position != null and position != '' and position != 'all'">
@@ -34,17 +35,18 @@
     </select>
     <select id="syncAll" resultType="HashMap">
         select id,
-            shop_name as shopName,
-            picture as picture,
-            shop_address as shopAddress,
-            shop_description as shopDescription,
-            shop_score as shopScore,
-            thumb,
-            collect,
-            work_time as workTime,
-            create_time as shopCreateTime,
-            update_time as shopUpdateTime,
-            is_deleted
+        shop_name as shopName,
+        picture as picture,
+        shop_address as shopAddress,
+        shop_description as shopDescription,
+        shop_score as shopScore,
+        floor,
+        thumb,
+        collect,
+        work_time as workTime,
+        create_time as shopCreateTime,
+        update_time as shopUpdateTime,
+        is_deleted
         from shop
         where is_deleted = 0
         <if test="position != null and position != '' and position != 'all'">
@@ -58,17 +60,18 @@
 
     <select id="syncAllByPage" resultType="HashMap">
         select id,
-        shop_name as shopName,
-        picture as picture,
-        shop_address as shopAddress,
-        shop_description as shopDescription,
-        shop_score as shopScore,
-        thumb,
-        collect,
-        work_time as workTime,
-        create_time as shopCreateTime,
-        update_time as shopUpdateTime,
-        is_deleted
+               shop_name        as shopName,
+               picture          as picture,
+               shop_address     as shopAddress,
+               shop_description as shopDescription,
+               shop_score       as shopScore,
+               floor,
+               thumb,
+               collect,
+               work_time        as workTime,
+               create_time      as shopCreateTime,
+               update_time      as shopUpdateTime,
+               is_deleted
         from shop
         order by create_time desc
     </select>
@@ -79,6 +82,7 @@
         shop_address as shopAddress,
         shop_description as shopDescription,
         shop_score as shopScore,
+        floor,
         thumb,
         collect,
         work_time as workTime,
@@ -102,6 +106,7 @@
                shop_address as shopAddress,
                shop_description as shopDescription,
                shop_score as shopScore,
+               floor,
                thumb,
                collect,
                work_time as workTime,
@@ -133,6 +138,9 @@
         <if test="shopDescription != null and shopDescription != '' ">
             shop_description = #{shopDescription},
         </if>
+        <if test="floor != null and floor != '' and floor != 0 ">
+            floor = #{floor},
+        </if>
         <if test="shopAddress != null and shopAddress != '' ">
             shop_address = #{shopAddress},
         </if>
@@ -148,7 +156,6 @@
         id = id
         where id = #{id}
     </update>
-
 
     <update id="deleteShop" parameterType="String">
         update shop set is_deleted = 1 where id = #{shopId}

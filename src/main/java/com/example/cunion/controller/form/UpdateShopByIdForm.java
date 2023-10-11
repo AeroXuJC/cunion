@@ -13,6 +13,8 @@ public class UpdateShopByIdForm {
 
     private String shopAddress;
 
+    private Integer floor;
+
     private String workTime;
 
     private String shopScore;
