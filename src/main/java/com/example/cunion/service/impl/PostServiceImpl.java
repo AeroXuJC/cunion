@@ -85,11 +85,6 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
     @Override
     public HashMap searchAllPostById(HashMap map) {
         String id = map.get("id").toString();
-        Object content = redisTemplate.opsForValue().get("post:content:" + id);
-        if (content != null) {
-            Map<String, Object> mapRedis = BeanUtil.beanToMap(content);
-            return (HashMap) mapRedis;
-        }
         HashMap hashMap = postMapper.searchAllPostById(map);
         if (hashMap == null){
             throw new CunionException("该帖已删除！");
@@ -108,8 +103,6 @@ public class PostServiceImpl extends ServiceImpl<PostMapper, Post>
         String tagList = hashMap.get("tagList").toString();
         HashMap tagMap = tagMapper.searchTagById(tagList);
         hashMap.replace("tagList", tagMap);
-        redisTemplate.opsForValue().set("post:content:" + id, hashMap);
-        redisTemplate.expire("post:content:" + id, 1, TimeUnit.HOURS);
         return hashMap;
     }
 

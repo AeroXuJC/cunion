@@ -42,7 +42,7 @@ public class UserController {
         StringSnowflakeIdGenerator stringSnowflakeIdGenerator = new StringSnowflakeIdGenerator(1, 1);
         String userId = stringSnowflakeIdGenerator.nextId();
         map.put("userId", userId);
-        map.put("nickname", "tourist_" + RandomStringGenerator.generateRandomString(12));
+        map.put("nickname", "tourist_" + RandomStringGenerator.generateRandomString(6));
         map.put("userAccount", RandomStringGenerator.generateRandomString(12));
         map.put("password", RandomStringGenerator.generateRandomString(12));
         map.put("address", "广东金融学院");
@@ -149,7 +149,7 @@ public class UserController {
     @RequiresPermissions(value = {"user", "admin"}, logical = Logical.OR)
     public R updateUserInfo(@RequestHeader("token") String token, @Valid @RequestBody UpdateUserInfoForm form){
         String userId = jwtUtil.getUserId(token);
-        form.setId(userId);
+        form.setUserId(userId);
         String email = form.getEmail();
         String phone = form.getPhone();
         String emailPattern = "[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[\\w](?:[\\w-]*[\\w])?";

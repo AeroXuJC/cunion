@@ -12,6 +12,7 @@ import com.example.cunion.service.UserService;
 import com.example.cunion.util.RandomStringGenerator;
 import com.example.cunion.util.StringSnowflakeIdGenerator;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -46,6 +47,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private RedisTemplate redisTemplate;
 
     @Resource
     private JwtUtil jwtUtil;
@@ -84,7 +88,7 @@ public class UserServiceImpl implements UserService {
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
         hashMap.put("password", encryptPassword);
         hashMap.put("id", id);
-        hashMap.put("nickname", "user_" + RandomStringGenerator.generateRandomString(16));
+        hashMap.put("nickname", "user_" + RandomStringGenerator.generateRandomString(8));
         Integer result = userMapper.register(hashMap);
         return result;
     }
@@ -191,7 +195,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Integer updateUserInfo(HashMap map) {
+        String userId = map.get("userId").toString();
+        Set keys = redisTemplate.keys("comment:searchAllComments:*");
+        Set keysParent = redisTemplate.keys("post:parentComment:*");
+        Set keysPost= redisTemplate.keys("comment:postComment:*");
+        if (keys != null){
+            redisTemplate.delete(keys);
+        }
+        if (keysParent != null){
+            redisTemplate.delete(keysParent);
+        }
+        if (keysPost != null){
+            redisTemplate.delete(keysPost);
+        }
+        redisTemplate.delete("post:searchAllPosts");
+        redisTemplate.delete("post:myAllPost:" + userId);
+        redisTemplate.delete("message:myMessage:" + userId);
         Integer result = userMapper.updateUserInfo(map);
+        try {
+            Thread.sleep(150);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        if (keys != null){
+            redisTemplate.delete(keys);
+        }
+        if (keysParent != null){
+            redisTemplate.delete(keysParent);
+        }
+        if (keysPost != null){
+            redisTemplate.delete(keysPost);
+        }
+        redisTemplate.delete("post:searchAllPosts");
+        redisTemplate.delete("post:myAllPost:" + userId);
+        redisTemplate.delete("message:myMessage:" + userId);
         if (result != 1){
             throw new CunionException("个人信息更新失败！");
         }

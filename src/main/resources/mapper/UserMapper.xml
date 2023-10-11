@@ -94,7 +94,7 @@
             avatar = #{avatar},
         </if>
             id = id
-        where id = #{id} And is_deleted = 0
+        where id = #{userId} And is_deleted = 0
     </update>
 
 

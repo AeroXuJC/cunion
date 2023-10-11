@@ -7,7 +7,7 @@ import javax.validation.constraints.Pattern;
 @Data
 public class UpdateUserInfoForm {
 
-    private String id;
+    private String userId;
 
     private String nickname;
 
