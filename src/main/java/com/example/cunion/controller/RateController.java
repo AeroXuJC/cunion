@@ -49,16 +49,16 @@ public class RateController {
             List<Double> list = JSONUtil.toList(rateValue.toString(), Double.class);
             score += list.get(0);
         }
-        score = score / keys.size();
+        score = score / (keys.size() * 1.0);
         // 创建DecimalFormat对象，指定保留一位小数的格式
-        DecimalFormat decimalFormat = new DecimalFormat("#.#");
+        DecimalFormat decimalFormat = new DecimalFormat("#.0");
         // 格式化数字，保留一位小数
         String formattedNumber = decimalFormat.format(score);
         //再将字符串Double转成Double
-        score = Double.parseDouble(formattedNumber);
+//        score = Double.parseDouble(formattedNumber);
         HashMap map = new HashMap();
         map.put("shopId", shopId);
-        map.put("score", score);
+        map.put("score", formattedNumber);
         redisTemplate.delete("shop:content:" + shopId);
         Set<String> allKeys = redisTemplate.keys( "shop:searchAllShops:*");
         if (allKeys != null) {
@@ -74,6 +74,6 @@ public class RateController {
         if (allKeys != null) {
             redisTemplate.delete(allKeys);
         }
-        return R.ok().put("result", score);
+        return R.ok().put("result", formattedNumber);
     }
 }

@@ -15,7 +15,7 @@ public class UpdateShopByIdForm {
 
     private String workTime;
 
-    private Double shopScore;
+    private String shopScore;
 
     private Integer isDeleted;
 }

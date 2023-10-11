@@ -52,7 +52,7 @@ public class Shop implements Serializable {
     /**
      * 商家评分
      */
-    private Double shop_score;
+    private String shop_score;
 
     /**
      * 点赞列表
