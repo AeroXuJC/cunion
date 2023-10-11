@@ -1,7 +1,5 @@
 package com.example.cunion.service.impl;
 
-import cn.hutool.core.lang.UUID;
-import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
 import com.example.cunion.config.shiro.JwtUtil;
 import com.example.cunion.entity.User;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

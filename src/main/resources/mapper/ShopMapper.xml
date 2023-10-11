@@ -137,7 +137,7 @@
             shop_address = #{shopAddress},
         </if>
         <if test="workTime != null and workTime != '' ">
-            work_name = #{workTime},
+            work_time = #{workTime},
         </if>
         <if test="shopScore != null and shopScore != '' ">
             shop_score = #{shopScore},
