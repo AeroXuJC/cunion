@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 /**
  * Canal + RabbitMQ 监听数据库数据变化
  *
- * @author Asurplus
  */
 @Slf4j
 @Component
