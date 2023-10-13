@@ -1,12 +1,11 @@
 package com.example.cunion.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
 import com.example.cunion.exception.CunionException;
 import com.example.cunion.mapper.CommentMapper;
+import com.example.cunion.patterns.PictureHandler;
 import com.example.cunion.service.CommentService;
-import com.example.cunion.util.MyScheduledTask;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +28,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<HashMap> searchAllComments(HashMap hashMap) {
+        PictureHandler pictureHandler = new PictureHandler();
         long start = Long.parseLong(hashMap.get("start").toString());
         long length = Long.parseLong(hashMap.get("length").toString());
         String shopId = hashMap.get("shopId").toString();
@@ -41,15 +41,8 @@ public class CommentServiceImpl implements CommentService {
         ArrayList<HashMap> maps = commentMapper.searchAllComments(hashMap);
         for (HashMap map : maps) {
             Object id = map.get("rootId");
-            Object picture = map.get("picture");
-            if (picture != null && !picture.equals("")) {
-                String[] split = picture.toString().split(",");
-                ArrayList list = new ArrayList();
-                for (int i = 0; i < split.length; i++) {
-                    list.add(split[i]);
-                }
-                map.replace("picture", list);
-            }
+            ArrayList<HashMap> list = pictureHandler.handle(map);
+            map.replace("picture", list);
             if (id != null && !id.equals("")) {
                 // 将字符串转换为JSONArray
                 JSONArray jsonArray = new JSONArray(id.toString());
@@ -57,18 +50,10 @@ public class CommentServiceImpl implements CommentService {
                 for (int i = jsonArray.size() - 1; i >= 0; i--) {
                     HashMap rootMap = commentMapper.searchCommentById(jsonArray.getStr(i).trim());
                     if (rootMap != null && !rootMap.equals("")) {
-                        Object rootPicture = rootMap.get("picture");
-                        if (rootPicture != null && !rootPicture.equals("")) {
-                            String[] split = rootPicture.toString().split(",");
-                            ArrayList list = new ArrayList();
-                            for (int j = 0; j < split.length; j++) {
-                                list.add(split[j]);
-                            }
-                            rootMap.replace("picture", list);
-                        }
+                        ArrayList<HashMap> rootList = pictureHandler.handle(rootMap);
+                        rootMap.replace("picture", rootList);
                     }
                     comments.add(rootMap);
-
                 }
                 map.put("rootComment", comments);
             }
@@ -186,25 +171,23 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public HashMap searchTopCommentById(String commentId) {
         HashMap map = commentMapper.searchCommentById(commentId);
+        PictureHandler pictureHandler = new PictureHandler();
         try {
+            ArrayList<HashMap> picture = pictureHandler.handle(map);
+            map.put("picture", picture);
             Object rootId = map.get("rootId");
-            Object picture = map.get("picture");
+            ArrayList<HashMap> arrayList = new ArrayList<>();
             if (rootId != null && !"[]".equals(rootId.toString()) && !"".equals(rootId.toString())) {
                 List<String> list = JSONUtil.toList(rootId.toString(), String.class);
-                ArrayList<HashMap> arrayList = new ArrayList<>();
                 for (int i = list.size() - 1; i >= 0; i--) {
                     HashMap hashMap = commentMapper.searchCommentById(list.get(i));
+                    if (hashMap != null && !hashMap.equals("")) {
+                        ArrayList<HashMap> rootList = pictureHandler.handle(hashMap);
+                        hashMap.replace("picture", rootList);
+                    }
                     arrayList.add(hashMap);
                 }
                 map.put("rootComment", arrayList);
-            }
-            if (picture != null && !"".equals(picture.toString())) {
-                String[] split = picture.toString().split(",");
-                ArrayList arrayList = new ArrayList();
-                for (int i = 0; i < split.length; i++) {
-                    arrayList.add(split[i]);
-                }
-                map.put("picture", arrayList);
             }
         } catch (Exception e) {
             throw new CunionException("该评论已删除！");
