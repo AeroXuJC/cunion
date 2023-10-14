@@ -24,7 +24,9 @@ public class RotationChartServiceImpl extends ServiceImpl<RotationChartMapper, R
 
     @Override
     public ArrayList<HashMap> searchAllRotationChart() {
+        //调用rotationChartMapper的searchAllRotationChart()方法，获取所有的旋转图表
         ArrayList<HashMap> list = rotationChartMapper.searchAllRotationChart();
+        //返回获取的旋转图表
         return list;
     }
 }

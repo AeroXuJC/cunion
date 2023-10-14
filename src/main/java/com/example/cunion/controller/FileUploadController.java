@@ -51,11 +51,6 @@ public class FileUploadController {
                         list.set(i, "空空空空");
                     }
                 }
-//                StringSnowflakeIdGenerator stringSnowflakeIdGenerator = new StringSnowflakeIdGenerator(1, 1);
-//                HashMap map = new HashMap();
-//                map.put("content", list.toString());
-//                map.put("id", stringSnowflakeIdGenerator.nextId());
-                System.out.println(list.toString());
                 // 关闭工作簿和输入流
                 workbook.close();
                 inputStream.close();

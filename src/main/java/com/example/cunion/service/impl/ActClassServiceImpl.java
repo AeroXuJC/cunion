@@ -16,8 +16,9 @@ public class ActClassServiceImpl implements ActClassService {
     @Resource
     private ActClassMapper actClassMapper;
 
-    @Override
+   @Override
     public ArrayList searchAllActClass(String position) {
+        //根据位置查找所有的活动类
         ArrayList<HashMap> list = actClassMapper.searchAllActClass(position);
         return list;
     }

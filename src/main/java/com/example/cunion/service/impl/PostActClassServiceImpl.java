@@ -22,8 +22,9 @@ public class PostActClassServiceImpl extends ServiceImpl<PostActClassMapper, Pos
     @Resource
     private PostActClassMapper postActClassMapper;
 
-    @Override
+   @Override
     public ArrayList<HashMap> searchAllPostClass() {
+        //调用postActClassMapper的searchAllPostClass方法，获取所有帖子分类信息
         ArrayList<HashMap> list = postActClassMapper.searchAllPostClass();
         return list;
     }

@@ -21,8 +21,9 @@ public class OperationServiceImpl extends ServiceImpl<OperationMapper, Operation
 
     @Resource
     private OperationMapper operationMapper;
-    @Override
+   @Override
     public ArrayList<HashMap> searchAllOperation() {
+        // 调用operationMapper的searchAllOperation()方法，获取所有操作信息
         ArrayList<HashMap> list = operationMapper.searchAllOperation();
         return list;
     }

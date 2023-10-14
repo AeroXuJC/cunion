@@ -27,15 +27,19 @@ public class TimetableController {
     @Resource
     private JwtUtil jwtUtil;
 
-    @GetMapping("/getTimetable")
+   @GetMapping("/getTimetable")
     @RequiresPermissions(value = {"user", "admin"}, logical = Logical.OR)
     public R getTimetable(@RequestHeader("token") String token) {
+        // 获取用户ID
         String userId = jwtUtil.getUserId(token);
+        // 调用服务层查询课程表
         HashMap map = timetableService.searchContentByUserId(userId);
+        // 判断查询结果是否为空
         if (map == null) {
             throw new CunionException("请上传Excel课程表文件导入");
         }
 //        List<String> list = JSONUtil.toList(map.get("content").toString(), String.class);
+        // 将map中的content转换为list
         ArrayList list = new ArrayList();
         String content = map.get("content").toString();
         String substring = content.substring(1, content.length() - 1);
@@ -43,12 +47,14 @@ public class TimetableController {
         for (int i = 0; i < split.length; i++) {
             list.add(split[i]);
         }
+        // 返回查询结果
         return R.ok().put("result", list);
     }
 
     @PostMapping("/xls")
     @RequiresPermissions(value = {"user", "admin"}, logical = Logical.OR)
     public R uploadXLS(@RequestParam("file") MultipartFile file, @RequestHeader("token") String token) {
+        // 获取用户ID
         String userId = jwtUtil.getUserId(token);
 
         // 处理上传的XLS文件，例如保存到服务器或进行其他处理
@@ -63,6 +69,7 @@ public class TimetableController {
 
                 // 假设要读取第一个工作表
                 Sheet sheet = workbook.getSheetAt(0);
+                // 创建一个list用于存储单元格内容
                 List<String> list = new ArrayList();
                 // 遍历行和列，读取单元格内容
                 for (Row row : sheet) {
@@ -71,6 +78,7 @@ public class TimetableController {
                         list.add(cell.toString());
                     }
                 }
+                // 遍历list，判断单元格内容是否为空，如果为空则替换为“空空空空”
                 for (int i = 0; i < list.size(); i++) {
                     if ("".equals(list.get(i).trim())) {
                         list.set(i, "空空空空");
@@ -80,20 +88,26 @@ public class TimetableController {
                 // 关闭工作簿和输入流
                 workbook.close();
                 inputStream.close();
+                // 调用服务层查询课程表
                 HashMap resultMap = timetableService.searchContentByUserId(userId);
+                // 判断查询结果是否为空
                 if (resultMap != null) {
+                    // 创建一个HashMap用于存储用户ID和单元格内容
                     HashMap hashMap = new HashMap();
                     hashMap.put("userId", userId);
                     hashMap.put("content", list.toString());
+                    // 调用服务层更新课程表
                     Integer result = timetableService.updateContent(hashMap);
                     return R.ok();
                 }
+                // 调用服务层添加课程表
                 StringSnowflakeIdGenerator stringSnowflakeIdGenerator = new StringSnowflakeIdGenerator(1, 1);
                 HashMap map = new HashMap();
                 map.put("content", list.toString());
                 map.put("id", stringSnowflakeIdGenerator.nextId());
                 map.put("userId", userId);
                 Integer result = timetableService.addTimetable(map);
+                // 判断添加结果
                 if (result != 1) {
                     throw new CunionException("导入课程表失败，请重试！");
                 }
