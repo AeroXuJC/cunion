@@ -15,4 +15,6 @@ public interface TimetableService{
     HashMap searchContentByUserId(String userId);
 
     Integer updateContent(HashMap map);
+
+    Integer deleteTimetable(String id);
 }

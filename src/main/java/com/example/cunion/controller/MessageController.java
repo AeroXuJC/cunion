@@ -73,7 +73,6 @@ public class MessageController {
     }
 
     @GetMapping("/getMessage")
-    @RequiresPermissions(value = {"user", "admin"}, logical = Logical.OR)
     public R getMessage(@RequestHeader("token") String token, @RequestParam("receiverId") String receiverId){
         // 接收消息
         List<HashMap> list = messageTask.receiveAsync(receiverId);

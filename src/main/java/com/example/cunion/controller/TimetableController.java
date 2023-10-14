@@ -42,13 +42,17 @@ public class TimetableController {
         // 将map中的content转换为list
         ArrayList list = new ArrayList();
         String content = map.get("content").toString();
+        String id = map.get("id").toString();
         String substring = content.substring(1, content.length() - 1);
         String[] split = substring.split(",");
         for (int i = 0; i < split.length; i++) {
             list.add(split[i]);
         }
-        // 返回查询结果
-        return R.ok().put("result", list);
+       HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("list", list);
+        hashMap.put("id", id);
+       // 返回查询结果
+        return R.ok().put("result", hashMap);
     }
 
     @PostMapping("/xls")
@@ -119,5 +123,11 @@ public class TimetableController {
         } else {
             return R.error("上传失败！");
         }
+    }
+
+    @GetMapping("/deleteTimetable")
+    public R deleteTimetable(@RequestHeader("token") String token, @RequestParam("id") String id){
+        Integer result = timetableService.deleteTimetable(id);
+        return R.ok();
     }
 }

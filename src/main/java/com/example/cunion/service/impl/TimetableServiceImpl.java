@@ -41,6 +41,15 @@ public class TimetableServiceImpl implements TimetableService {
         }
         return result;
     }
+
+    @Override
+    public Integer deleteTimetable(String id) {
+        Integer result = timetableMapper.deleteTimetable(id);
+        if (result != 1){
+            throw new CunionException("课表删除失败！");
+        }
+        return result;
+    }
 }
 
 

@@ -19,6 +19,8 @@ public interface TimetableMapper {
     HashMap searchContentByUserId(String userId);
 
     Integer updateContent(HashMap map);
+
+    Integer deleteTimetable(String id);
 }
 
 

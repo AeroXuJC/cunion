@@ -9,10 +9,14 @@
     </insert>
 
     <select id="searchContentByUserId" parameterType="String" resultType="HashMap">
-        select content from timetable where user_id = #{userId} And is_deleted = 0
+        select content, id from timetable where user_id = #{userId} And is_deleted = 0
     </select>
 
     <update id="updateContent" parameterType="HashMap">
         update timetable set content = #{content} where user_id = #{userId} And is_deleted = 0
+    </update>
+
+    <update id="deleteTimetable" parameterType="String">
+        update timetable set is_deleted = 1 where id = #{id}
     </update>
 </mapper>
